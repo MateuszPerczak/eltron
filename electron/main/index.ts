@@ -2,7 +2,8 @@ import "v8-compile-cache";
 
 import { join } from "node:path";
 
-import { app, BrowserWindow, ipcMain, Menu } from "electron";
+import { app, ipcMain, Menu } from "electron";
+import { IS_WINDOWS_11, MicaBrowserWindow } from "mica-electron";
 
 import { type AppContent, Environment } from "./index.types";
 
@@ -28,7 +29,11 @@ if (!app.requestSingleInstanceLock()) {
 const initApp = async (): Promise<void> => {
   await app.whenReady();
 
-  const window: BrowserWindow = initMainWindow();
+  const window: MicaBrowserWindow = initMainWindow();
+
+  if (IS_WINDOWS_11) {
+    window.setMicaTabbedEffect();
+  }
 
   // load app content
   appContent[env](window);
@@ -39,9 +44,9 @@ const initApp = async (): Promise<void> => {
   window.on("ready-to-show", () => onReadyToShow(window));
 };
 
-const initMainWindow = (): BrowserWindow => {
+const initMainWindow = (): MicaBrowserWindow => {
   const preload = join(__dirname, "..", "preload", "index.js");
-  return new BrowserWindow({
+  return new MicaBrowserWindow({
     title: "",
     icon: join(process.env.PUBLIC, "favicon.ico"),
     webPreferences: {
@@ -50,12 +55,13 @@ const initMainWindow = (): BrowserWindow => {
     show: false,
     width: 1030,
     height: 630,
+    frame: false,
   });
 };
 
 const initApi = (): void => {
   ipcMain.on("show-dev-tools", ({ sender }) => {
-    const window = BrowserWindow.fromWebContents(sender);
+    const window = MicaBrowserWindow.fromWebContents(sender);
     window && window.webContents.openDevTools();
   });
 };
@@ -64,7 +70,7 @@ const configApp = (): void => {
   Menu.setApplicationMenu(null);
 };
 
-const onReadyToShow = (window: BrowserWindow): void => {
+const onReadyToShow = (window: MicaBrowserWindow): void => {
   // show window on screen workaround
   window.setAlwaysOnTop(true, "normal", 1);
   window.show();
@@ -72,11 +78,11 @@ const onReadyToShow = (window: BrowserWindow): void => {
 };
 
 const appContent: AppContent = {
-  development: (window: BrowserWindow) => {
+  development: (window: MicaBrowserWindow) => {
     window.loadURL(url);
     // window.webContents.openDevTools();
   },
-  production: (window: BrowserWindow) => {
+  production: (window: MicaBrowserWindow) => {
     window.loadFile(indexHtml);
   },
 };

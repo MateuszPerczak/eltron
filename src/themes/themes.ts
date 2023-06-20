@@ -13,7 +13,7 @@ const themes: Themes = {
     color: "#000",
   },
   dark: {
-    background: "#000",
+    background: "#00000000",
     color: "#fff",
   },
 };

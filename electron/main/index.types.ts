@@ -1,6 +1,6 @@
-import type { BrowserWindow } from "electron";
+import type { MicaBrowserWindow } from "mica-electron";
 export enum Environment {
-    Development = "development",
-    Production = "production"
+  Development = "development",
+  Production = "production",
 }
-export type AppContent = Record<Environment, (window: BrowserWindow) => void>
+export type AppContent = Record<Environment, (window: MicaBrowserWindow) => void>;
